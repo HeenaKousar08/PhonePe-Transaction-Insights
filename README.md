@@ -112,13 +112,6 @@ pip install -r requirements.txt
 streamlit run app/app.py
 ```
 
----
-
-## 📸 Dashboard Preview
-
-*(Add your project screenshots here for better presentation)*
-
----
 
 ## 📈 Business Insights
 
@@ -138,6 +131,10 @@ streamlit run app/app.py
 * Add district-level insights
 
 ---
+## 📸 Dashboard Preview
+
+### 🔹 Main Dashboard
+![Dashboard](assets/dashboard.png)
 
 ## 👩‍💻 Author
 
