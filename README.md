@@ -81,14 +81,18 @@ PhonePe-Transaction-Insights/
 ├── requirements.txt           # Project Dependencies
 └── README.md                  # Project Documentation
 
-⚙️ Installation & Setup
+
+##⚙️ Installation & Setup
+
 1️⃣ Clone Repository
 Bash
 git clone [https://github.com/HeenaKousar08/PhonePe-Transaction-Insights.git](https://github.com/HeenaKousar08/PhonePe-Transaction-Insights.git)
 cd PhonePe-Transaction-Insights
+
 2️⃣ Install Dependencies
 Bash
 pip install -r requirements.txt
+
 3️⃣ Setup Database
 Create a MySQL database named phonepe.
 
@@ -101,16 +105,21 @@ Load the data using the ingestion script:
 
 Bash
 python scripts/load_to_sql.py
+
 4️⃣ Run the Application
 Bash
 streamlit run app/app.py
+
 📸 Dashboard Preview
+
 🔹 Executive Dashboard
 🔹 India Map Intelligence
 🔹 AI Analytics & Clustering
 🔹 Prediction Engine
 🔹 SQL Business Intelligence
+
 📈 Strategic Business Insights
+
 Digital Maturity: Average Ticket Size (ATS) analysis reveals whether a state is a "High-Value" transfer hub or a "Retail Micro-payment" hub.
 
 Saturation Points: Map insights identify states where merchant infrastructure is highly mature.
@@ -118,8 +127,8 @@ Saturation Points: Map insights identify states where merchant infrastructure is
 Market Tiers: Clustering helps businesses prioritize marketing spend based on high-volume vs high-value state behaviors.
 
 👩‍💻 Author
-Heena Kousar
-Aspiring Data Analyst
-GitHub Profile | LinkedIn
+
+**Heena Kousar**
+**Aspiring Data Analyst**
 
 ⭐ If you find this project useful, please consider giving it a Star on GitHub!
