@@ -1,199 +1,124 @@
-# 📱 PhonePe AI-Powered Transaction Insights
+📱 PhonePe Intelligence Pro – AI-Powered Transaction Insights
+🚀 Overview
 
-## 🚀 Overview
+PhonePe Intelligence Pro is an advanced analytics dashboard built using Streamlit that delivers deep insights into digital payment trends across India.
 
-**PhonePe AI-Powered Transaction Insights** is an advanced interactive data analytics dashboard built using Streamlit. It provides deep insights into digital transaction patterns across India by integrating data visualization, SQL-based querying, and machine learning models.
+This project combines:
 
-This project showcases a complete data pipeline — from raw JSON data extraction and database storage to real-time analytics, visualization, anomaly detection, and future forecasting.
+📊 Interactive data visualization
+🧠 Machine learning analytics
+🗄️ SQL-based aggregation
+🔮 Predictive modeling
 
----
+to transform raw transaction data into actionable business intelligence.
 
-## 🎯 Objectives
-
-* Analyze transaction trends across states, years, and categories  
-* Build an interactive dashboard for business intelligence  
-* Visualize geographical distribution of transactions across India  
-* Detect anomalies in transaction patterns using AI  
-* Predict future transaction trends using machine learning  
-
----
-
-## 📊 Key Features
-
-### 📍 Interactive Dashboard
-
-* Dynamic filters for **State** and **Year**
-* KPI metrics:
-  - Total Transaction Amount 💰
-  - Total Transactions 📊
-  - Average Transaction Value 📈
-* Multiple chart types (Line / Bar / Area)
-
----
-
-### 📈 Data Visualization
-
-* Yearly transaction trends  
-* Category-wise performance analysis  
-* State-level comparisons  
-* Clean and responsive UI using Plotly  
-
----
-
-### 🌍 India State-wise Map
-
-* Choropleth map for geographic insights  
-* State-wise transaction distribution  
-* Highlights regional digital adoption patterns  
-
----
-
-### 🧠 Machine Learning Insights
-
-* **K-Means Clustering** → Market segmentation of states  
-* **Isolation Forest** → Anomaly detection in transaction trends  
-* Identifies unusual spikes or drops in data  
-
----
-
-### 🔮 Prediction & Forecasting
-
-* **Polynomial Regression** → Future transaction prediction  
-* **Prophet Model (optional)** → Advanced time-series forecasting  
-* Forecasts trends for upcoming years  
-
----
-
-### 📁 SQL Insights
-
-* Top 10 states by transaction amount  
-* Category-wise transaction performance  
-* Yearly transaction growth trends  
-* Direct SQL queries integrated into dashboard  
-
----
-
-### 📥 Data Export
-
-* Download dataset as CSV directly from dashboard  
-
----
-
-## 🛠️ Tech Stack
-
-| Category        | Tools Used                         |
-| --------------- | ---------------------------------- |
-| Programming     | Python                             |
-| Dashboard       | Streamlit                          |
-| Database        | MySQL / SQLite                     |
-| Visualization   | Plotly, Matplotlib, Seaborn        |
-| Machine Learning| Scikit-learn, Prophet              |
-| Data Handling   | Pandas, NumPy                      |
-| Version Control | Git & GitHub                       |
-
----
-
-## 📂 Project Structure
-
+🎯 Objectives
+Analyze transaction patterns across states and years
+Provide interactive dashboards for business decision-making
+Visualize geographical distribution using India map
+Apply machine learning for segmentation & forecasting
+Extract insights directly from SQL database queries
+📊 Key Features
+📉 1. Interactive Dashboard
+State & Year filters
+KPI metrics:
+Total Transaction Value
+Transaction Volume
+Average Ticket Size
+Dynamic charts (Line / Bar / Area)
+🌍 2. India Map Visualization
+Choropleth map of India
+State-wise transaction distribution
+Identifies top-performing regions
+Highlights digital adoption gaps
+🧠 3. AI Analytics (Machine Learning)
+K-Means Clustering
+Segments states into behavioral groups
+Uses:
+Transaction Amount
+Transaction Count
+Helps identify:
+High-value markets
+Emerging regions
+🔮 4. Predictions (Forecasting)
+Polynomial Regression Model
+Predicts future transaction trends (2025–2027)
+Shows:
+Growth trajectory
+Market expansion patterns
+📂 5. SQL Intelligence
+Real-time database insights using SQL
+Key analysis:
+🏆 Top performing states
+📂 Category-wise performance
+Interactive tables + charts
+📥 6. Data Export
+Download dataset as CSV
+Useful for reporting & further analysis
+🛠️ Tech Stack
+Category	Tools Used
+Programming	Python
+Dashboard	Streamlit
+Database	MySQL (via SQLAlchemy & PyMySQL)
+Visualization	Plotly
+Machine Learning	Scikit-learn
+Data Handling	Pandas
+📂 Project Structure
 PhonePe-Transaction-Insights/
 │
-├── app.py                        # Main Streamlit dashboard
-├── phonepe.db / MySQL DB         # Database
-├── india_states.geojson          # Map file
-├── requirements.txt
-├── README.md
-│
-├── assets/
-│   ├── dashboard.png
-│   ├── map.png
-│   └── prediction.png
-│
+├── app.py                     # Main Streamlit App
+├── phonepe.db / MySQL DB     # Database
+├── india_states.geojson      # Map file
 ├── notebooks/
-│   └── analysis.ipynb            # Data analysis & ML
-
-
----## ⚙️ Installation & Setup###
-
-1️⃣ Clone the Repository
- ```bashgit clone https://github.com/HeenaKousar08/PhonePe-Transaction-Insights.gitcd PhonePe-Transaction-Insights
-
+│   └── analysis.ipynb        # Data analysis & ML
+├── requirements.txt
+└── README.md
+⚙️ Installation & Setup
+1️⃣ Clone Repository
+git clone https://github.com/HeenaKousar08/PhonePe-Transaction-Insights.git
+cd PhonePe-Transaction-Insights
 2️⃣ Install Dependencies
 pip install -r requirements.txt
-
-3️⃣ Setup Database
-Option 1: MySQL
-
-
-Create database: phonepe
-
-
-Load dataset into table: aggregated_transaction
-
-
-Option 2: SQLite (Recommended for simplicity)
-
-
-Use phonepe.db file directly
-
-
-
+3️⃣ Setup MySQL Database
+Create database:
+CREATE DATABASE phonepe;
+Import your dataset into:
+aggregated_transaction
 4️⃣ Run the Application
 streamlit run app.py
-
 📈 Business Insights
-
-
-Strong growth in digital transactions across years 📈
-
-
-Certain states dominate the digital payment ecosystem
-
-
-Category analysis reveals consumer spending behavior
-
-
-Anomaly detection highlights unusual transaction spikes
-
-
-Forecasting helps predict future digital payment trends
-
-
-
+📊 Digital transactions show strong upward growth
+🌍 Certain states dominate in transaction value & volume
+🧠 AI clustering reveals:
+High-growth markets
+Underperforming regions
+🔮 Forecasting indicates continued expansion of digital payments
+⚠️ Challenges Solved
+Fixed SQL column mismatch (category vs transaction_type)
+Resolved Streamlit tab rendering issues
+Optimized ML pipeline for better insights
+Handled database integration errors
 🔮 Future Enhancements
-
-
-Real-time data integration
-
-
-Advanced ML models (XGBoost, Deep Learning)
-
-
+Real-time data integration (API-based)
+Advanced ML models (XGBoost, Prophet)
+District-level analytics
 Cloud deployment (AWS / Streamlit Cloud)
-
-
-District-level analysis
-
-
-Enhanced UI/UX with animations
-
-
-
+User authentication system
 📸 Dashboard Preview
-
-
 🔹 Main Dashboard
 
-🔹 India Map
+(Add your screenshot here)
 
-🔹 Prediction
-
-
+assets/dashboard.png
 👩‍💻 Author
+
 Heena Kousar
 Aspiring Data Analyst | Python | SQL | Machine Learning
 
 📜 License
-This project is open-source and available under the MIT License.
+
+This project is open-source under the MIT License
 
 ⭐ Support
-If you like this project, consider giving it a ⭐ on GitHub!
+
+If you found this project useful, consider giving it a ⭐ on GitHub!
