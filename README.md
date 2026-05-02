@@ -94,13 +94,7 @@ PhonePe-Transaction-Insights/
 ### 📊 Dashboard
 ![Dashboard](assets/dashboard.png)
 
-### 🌍 India Map
-![Map](assets/Indiamap.png)
 
-### 🔮 Predictions
-![Predictions](assets/prediction.png)
-
----
 
 ## 🛠️ Installation & Setup
 
