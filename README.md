@@ -128,7 +128,7 @@ Market Tiers: Clustering helps businesses prioritize marketing spend based on hi
 
 👩‍💻 Author
 
-**Heena Kousar**
-**Aspiring Data Analyst**
+Heena Kousar
+Aspiring Data Analyst
 
 ⭐ If you find this project useful, please consider giving it a Star on GitHub!
