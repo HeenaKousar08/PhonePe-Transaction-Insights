@@ -1,9 +1,10 @@
+streamlit
 pandas
 numpy
+plotly
 matplotlib
 seaborn
+scikit-learn
 sqlalchemy
 pymysql
-psycopg2
-streamlit
-plotly
+prophet

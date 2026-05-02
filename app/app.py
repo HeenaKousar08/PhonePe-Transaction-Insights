@@ -1,379 +1,206 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
+import json, os, io
 from sqlalchemy import create_engine
 from urllib.parse import quote_plus
-import plotly.express as px
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.cluster import KMeans
+from sklearn.ensemble import IsolationForest
 
-# ---- PAGE CONFIG ----
-st.set_page_config(
-    page_title="PhonePe Analytics Dashboard",
-    page_icon="📱",
-    layout="wide"
-)
-
-# ---- CUSTOM LIGHT UI ----
-st.markdown("""
-<style>
-[data-testid="stAppViewContainer"] {
-    background-color: #F5F6FA;
-}
-[data-testid="stSidebar"] {
-    background-color: #FFFFFF;
-}
-.metric-card {
-    background: white;
-    padding: 18px;
-    border-radius: 12px;
-    text-align: center;
-    border: 1px solid #E5E7EB;
-    box-shadow: 0px 3px 8px rgba(0,0,0,0.05);
-}
-h1 {
-    color: #5F259F;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ---- DATABASE ----
+# ==========================================
+# 1. DATABASE & ENGINE SECTION
+# ==========================================
 @st.cache_resource
 def get_engine():
     username = "heena"
     password = quote_plus("Heena@08")
-    return create_engine(
-        f"mysql+pymysql://{username}:{password}@127.0.0.1:3306/phonepe"
-    )
+    return create_engine(f"mysql+pymysql://{username}:{password}@127.0.0.1:3306/phonepe")
 
 engine = get_engine()
 
-# ---- LOAD DATA ----
 @st.cache_data
 def load_data():
-    return pd.read_sql("SELECT * FROM aggregated_transaction", engine)
+    df = pd.read_sql("SELECT * FROM aggregated_transaction", engine)
+    df.columns = df.columns.str.strip().str.lower()
+    # Map DB names to internal logic
+    if 'category' in df.columns: df['transaction_type'] = df['category']
+    if 'count' in df.columns: df['transaction_count'] = df['count']
+    if 'amount' in df.columns: df['amount'] = df['amount']
+    df['state'] = df['state'].str.lower()
+    return df
 
 df = load_data()
-df['state'] = df['state'].str.lower()
 
-# ---- SIDEBAR ----
-st.sidebar.title("🔍 Filters")
-state = st.sidebar.selectbox("Select State", sorted(df['state'].unique()))
-year = st.sidebar.selectbox("Select Year", sorted(df['year'].unique()))
+# ==========================================
+# 2. UI CONFIG & SIDEBAR
+# ==========================================
+st.set_page_config(page_title="PhonePe Intelligence Pro", page_icon="📱", layout="wide")
 
-filtered_df = df[(df['state'] == state) & (df['year'] == year)]
+PRIMARY_COLOR = "#5F259F" 
+SECONDARY_COLOR = "#F4F7F9" 
 
-# ---- ADVANCED FILTER (NEW) ----
-st.sidebar.markdown("### ⚙ Advanced Filters")
-
-multi_states = st.sidebar.multiselect(
-    "Select Multiple States",
-    df['state'].unique()
-)
-
-if multi_states:
-    filtered_df = df[(df['state'].isin(multi_states)) & (df['year'] == year)]
-
-# ---- HEADER ----
-st.markdown("""
+st.markdown(f"""
 <style>
-.header-container {
-    text-align: center;
-    padding: 25px 10px;
-}
-
-.header-title {
-    font-size: 38px;
-    font-weight: 700;
-    color: #5F259F;
-    margin-bottom: 8px;
-}
-
-.header-subtitle {
-    font-size: 16px;
-    color: #6B7280;
-    margin-bottom: 15px;
-}
-
-.logo {
-    width: 70px;
-    margin-bottom: 10px;
-}
-
-.divider {
-    height: 1px;
-    background: linear-gradient(to right, transparent, #D1D5DB, transparent);
-    margin-top: 10px;
-    margin-bottom: 20px;
-}
+[data-testid="stAppViewContainer"] {{background-color: {SECONDARY_COLOR};}}
+.stMetric {{background: white; padding: 20px; border-radius: 10px; border: 1px solid #E0E0E0;}}
+.insight-box {{
+    background-color: #ffffff; padding: 20px; border-radius: 8px;
+    border-left: 5px solid {PRIMARY_COLOR}; margin: 15px 0;
+    box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
+}}
+.insight-title {{color: {PRIMARY_COLOR}; font-weight: bold; font-size: 16px; margin-bottom: 5px;}}
+h1, h2, h3 {{color: {PRIMARY_COLOR};}}
 </style>
-
-<div class="header-container">
-    <img class="logo" src="https://download.logo.wine/logo/PhonePe/PhonePe-Logo.wine.png">
-    <div class="header-title">PhonePe AI-Powered Transaction Insights</div>
-    <div class="header-subtitle">
-        Real-time insights, predictive analytics, and anomaly detection for digital transactions
-    </div>
-</div>
-
-<div class="divider"></div>
 """, unsafe_allow_html=True)
-# ---- KPI ----
-total_amount = filtered_df['amount'].sum()
-total_transactions = len(filtered_df)
-avg_transaction = filtered_df['amount'].mean()
 
-col1, col2, col3 = st.columns(3)
+st.sidebar.title("📊 Control Panel")
+state_list = sorted(df['state'].unique())
+selected_state = st.sidebar.selectbox("State Selection", state_list)
+selected_year = st.sidebar.selectbox("Fiscal Year", sorted(df['year'].unique()))
 
-with col1:
-    st.markdown(f"<div class='metric-card'><h3>💰 Total Amount</h3><h2>₹ {total_amount:,.0f}</h2></div>", unsafe_allow_html=True)
-with col2:
-    st.markdown(f"<div class='metric-card'><h3>📊 Transactions</h3><h2>{total_transactions}</h2></div>", unsafe_allow_html=True)
-with col3:
-    st.markdown(f"<div class='metric-card'><h3>📈 Avg Transaction</h3><h2>₹ {avg_transaction:,.0f}</h2></div>", unsafe_allow_html=True)
+st.sidebar.markdown("---")
+target_metric = st.sidebar.radio("Metric Filter", ["amount", "transaction_count"], 
+                                format_func=lambda x: "Value (₹)" if x == "amount" else "Count")
 
-    # ---- KPI GROWTH (NEW) ----
-prev_year = year - 1
-prev_data = df[(df['state'] == state) & (df['year'] == prev_year)]
-
-if not prev_data.empty:
-    prev_amount = prev_data['amount'].sum()
-    growth = ((total_amount - prev_amount) / prev_amount) * 100 if prev_amount != 0 else 0
-
-    st.metric("📈 YoY Growth", f"{growth:.2f}%", delta=f"{growth:.2f}%")
-
-# ---- TREND ----
-st.markdown("## 📈 Trends")
-
-chart_type = st.selectbox("Select Trend Chart", ["Line", "Bar", "Area"])
-
-year_data = df[df['state'] == state].groupby('year')['amount'].sum().reset_index()
-
-if chart_type == "Line":
-    fig1 = px.line(year_data, x='year', y='amount', markers=True)
-elif chart_type == "Bar":
-    fig1 = px.bar(year_data, x='year', y='amount')
-else:
-    fig1 = px.area(year_data, x='year', y='amount')
-
-st.plotly_chart(fig1, use_container_width=True)
-
-# ---- ANOMALY DETECTION ----
-st.markdown("## 🚨 Anomaly Detection")
-
-year_data['z_score'] = (year_data['amount'] - year_data['amount'].mean()) / year_data['amount'].std()
-
-anomalies = year_data[abs(year_data['z_score']) > 1.5]
-
-fig_anomaly = px.scatter(year_data, x='year', y='amount',
-                         color=year_data['z_score'].abs() > 1.5,
-                         title="Anomaly Detection")
-
-st.plotly_chart(fig_anomaly, use_container_width=True)
-
-if not anomalies.empty:
-    st.warning(f"⚠ Detected {len(anomalies)} unusual spikes in data")
-
-# ---- GROWTH ----
-year_data['growth'] = year_data['amount'].pct_change() * 100
-
-fig2 = px.bar(year_data, x='year', y='growth', title="Growth Rate (%)")
-st.plotly_chart(fig2, use_container_width=True)
-
-# ---- INSIGHTS ----
-st.markdown("## 🏆 Insights")
-
-# ---- DEFINE TOP STATE (FIX) ----
-top_state = df.groupby('state')['amount'].sum().idxmax()
-
-# ---- SMART INSIGHTS ----
-st.markdown("## 🧠 Smart Insights")
-
-
-growth_text = ""
-
-if len(year_data) > 1:
-    first = year_data.iloc[0]['amount']
-    last = year_data.iloc[-1]['amount']
-    change = ((last - first) / first) * 100 if first != 0 else 0
-
-    growth_text = f"📊 Transactions changed by {change:.2f}% over the years."
-
-top3 = df.groupby('state')['amount'].sum().nlargest(3)
-contribution = (top3.sum() / df['amount'].sum()) * 100
-
-st.info(f"""
-{growth_text}
-
-🏆 Top 3 states contribute **{contribution:.2f}%** of total transactions.
-
-🚀 Highest performing state: **{top_state.upper()}**
-""")
-
-# Top states chart switch
-chart_type2 = st.selectbox("Top States Chart Type", ["Bar", "Horizontal Bar"])
-
-top_states = df.groupby('state')['amount'].sum().nlargest(10).reset_index()
-
-if chart_type2 == "Bar":
-    fig3 = px.bar(top_states, x='state', y='amount')
-else:
-    fig3 = px.bar(top_states, x='amount', y='state', orientation='h')
-
-st.plotly_chart(fig3, use_container_width=True)
-
-# Category chart switch
-if 'category' in df.columns:
-    chart_type3 = st.selectbox("Category Chart Type", ["Pie", "Bar"])
-    cat_data = df.groupby('category')['amount'].sum().reset_index()
-
-    if chart_type3 == "Pie":
-        fig4 = px.pie(cat_data, names='category', values='amount')
+# ==========================================
+# 3. GLOBAL CHART HELPER
+# ==========================================
+def render_pro_chart(data, x, y, title, c_type, color=None):
+    if c_type == "Line":
+        return px.line(data, x=x, y=y, color=color, markers=True, title=title, template="plotly_white", color_discrete_sequence=[PRIMARY_COLOR])
+    elif c_type == "Bar":
+        return px.bar(data, x=x, y=y, color=color, title=title, template="plotly_white", color_discrete_sequence=[PRIMARY_COLOR])
+    elif c_type == "Area":
+        return px.area(data, x=x, y=y, color=color, title=title, template="plotly_white", color_discrete_sequence=[PRIMARY_COLOR])
     else:
-        fig4 = px.bar(cat_data, x='category', y='amount')
+        return px.scatter(data, x=x, y=y, color=color, title=title, template="plotly_white", color_discrete_sequence=[PRIMARY_COLOR])
 
-    st.plotly_chart(fig4, use_container_width=True)
+# ==========================================
+# 4. HEADER
+# ==========================================
+# ==========================================
+# 4. HEADER
+# ==========================================
+st.markdown("""
+<div style='text-align:center'>
+<img src="https://download.logo.wine/logo/PhonePe/PhonePe-Logo.wine.png" width="70">
+<h1>PhonePe AI-Powered Transaction Insights</h1>
+</div>
+<hr>
+""", unsafe_allow_html=True)
 
-# ---- ML ----
-# ---- ML UPGRADE ----
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.pipeline import make_pipeline
+# ==========================================
+# 5. TABS
+# ==========================================
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["📉 Dashboard", "🌍 India Map", "🧠 AI Analytics", "🔮 Predictions", "📂 SQL Intelligence"])
 
-st.markdown("## 🔮 Future Prediction (Advanced)")
+# ---- TAB 1: DASHBOARD ----
+with tab1:
+    f_df = df[(df['state'] == selected_state) & (df['year'] == selected_year)]
+    if not f_df.empty:
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Total Transaction Value", f"₹ {f_df['amount'].sum():,.0f}")
+        c2.metric("Total Volume", f"{f_df['transaction_count'].sum():,.0f}")
+        c3.metric("Avg. Ticket Size", f"₹ {f_df['amount'].mean():,.0f}")
 
-model = make_pipeline(PolynomialFeatures(degree=2), LinearRegression())
-model.fit(year_data[['year']], year_data['amount'])
+    col_chart, col_ctrl = st.columns([4, 1])
+    with col_ctrl: chart_choice = st.selectbox("Visual Mode", ["Area", "Line", "Bar"], key="t1")
+    with col_chart:
+        year_data = df[df['state'] == selected_state].groupby('year')[target_metric].sum().reset_index()
+        st.plotly_chart(render_pro_chart(year_data, 'year', target_metric, f"Growth Path: {selected_state.title()}", chart_choice), use_container_width=True)
+    
+    st.markdown(f"""<div class="insight-box"><div class="insight-title">Strategic Summary</div>
+    The spending behavior in {selected_state.title()} for {selected_year} is driven by an average ticket size of ₹{f_df['amount'].mean():,.2f}.</div>""", unsafe_allow_html=True)
 
-future = pd.DataFrame({'year': [2025, 2026, 2027]})
-future['prediction'] = model.predict(future)
+# ---- TAB 2: INDIA MAP (PRESERVED) ----
+with tab2:
+    st.markdown("## 🌍 India Map")
+    df['state_clean'] = df['state'].str.replace("-", " ", regex=False).str.replace("&", "and", regex=False).str.strip().str.title()
+    state_mapping = {"Andaman And Nicobar Islands": "Andaman and Nicobar Islands", "Nct Of Delhi": "Delhi", "Jammu And Kashmir": "Jammu & Kashmir"}
+    df['state_clean'] = df['state_clean'].replace(state_mapping)
 
-# Combine actual + predicted
-combined = pd.concat([
-    year_data.rename(columns={'amount': 'value'})[['year', 'value']],
-    future.rename(columns={'prediction': 'value'})
-])
+    geo_path = os.path.join(os.path.dirname(__file__), "india_states.geojson")
+    try:
+        with open(geo_path) as f:
+            geojson = json.load(f)
+        KEY = next((k for k in ['ST_NM', 'state', 'NAME_1', 'name'] if k in geojson['features'][0]['properties']), None)
+        if KEY:
+            map_data = df.groupby('state_clean')[target_metric].sum().reset_index()
+            fig_map = px.choropleth(map_data, geojson=geojson, featureidkey=f"properties.{KEY}", locations="state_clean", color=target_metric, color_continuous_scale="Turbo")
+            fig_map.update_geos(fitbounds="locations", visible=False)
+            st.plotly_chart(fig_map, use_container_width=True)
+            
+            # --- INSIGHTS FOR TAB 2 ---
+            top_map_state = map_data.sort_values(target_metric, ascending=False).iloc[0]
+            st.markdown(f"""
+            <div class="insight-box">
+            <div class="insight-title">🌍 Geographic Intelligence</div>
+            <li><b>National Leader:</b> <b>{top_map_state['state_clean']}</b> dominates the digital landscape with the highest overall {target_metric.replace('_',' ')}.</li>
+            <li><b>Regional Disparity:</b> The contrast in the heatmap highlights the digital divide, showing where infrastructure expansion is most needed versus where the market is saturated.</li>
+            </div>
+            """, unsafe_allow_html=True)
+    except:
+        st.error("GeoJSON missing. Geographic analysis disabled.")
 
-fig5 = px.line(combined, x='year', y='value', markers=True,
-               title="Actual + Predicted Trend")
+# ---- TAB 3: AI ANALYTICS (ADVANCED CLUSTERING) ----
+with tab3:
+    st.markdown("### 🧠 Market Segmentation & Behavior")
+    t3_choice = st.selectbox("Clustering View", ["Scatter", "Bar"], key="t3")
+    
+    # Advanced Multi-Feature Clustering
+    cluster_df = df.groupby('state').agg({'amount': 'sum', 'transaction_count': 'sum'}).reset_index()
+    X = StandardScaler().fit_transform(cluster_df[['amount', 'transaction_count']])
+    cluster_df['cluster'] = KMeans(n_clusters=3, random_state=42, n_init=10).fit_predict(X)
+    
+    st.plotly_chart(render_pro_chart(cluster_df, 'transaction_count', 'amount', "Market Tier Analysis", t3_choice, color='cluster'), use_container_width=True)
+    st.markdown("""<div class="insight-box"><div class="insight-title">AI Interpretation</div>
+    The algorithm has partitioned states into 3 behavioral clusters. High-volume, high-value states appear in the upper right, representing mature digital economies.</div>""", unsafe_allow_html=True)
+# ---- TAB 4: PREDICTIONS ----
+with tab4:
+    st.markdown("### 🔮 Revenue Forecasting")
+    t4_choice = st.selectbox("Projection Style", ["Line", "Area"], key="t4")
+    all_y = df.groupby('year')[target_metric].sum().reset_index()
+    
+    if len(all_y) > 2:
+        model = make_pipeline(PolynomialFeatures(2), LinearRegression()).fit(all_y[['year']], all_y[target_metric])
+        future = pd.DataFrame({'year': [2025, 2026, 2027]})
+        future[target_metric] = model.predict(future)
+        combined = pd.concat([all_y.assign(Status='Historical'), future.assign(Status='Forecast')])
+        st.plotly_chart(render_pro_chart(combined, 'year', target_metric, "Forward Outlook to 2027", t4_choice, color='Status'), use_container_width=True)
+        st.markdown(f"""<div class="insight-box"><div class="insight-title">Forecast Insight</div>
+        The trend suggests a <b>{'positive' if future.iloc[-1][target_metric] > all_y.iloc[-1][target_metric] else 'corrective'}</b> trajectory for the upcoming years.</div>""", unsafe_allow_html=True)
+# ---- TAB 5: SQL INTELLIGENCE (PROFESSIONAL TABLES & CHARTS) ----
+with tab5:
+    st.markdown("### 📂 Global SQL Aggregations")
+    t5_choice = st.selectbox("Aggregation Visual", ["Bar", "Line"], key="t5")
 
-st.plotly_chart(fig5, use_container_width=True)
+    # Clean SQL Queries matching DESCRIBE output
+    top_states = pd.read_sql("SELECT state, SUM(amount) as total FROM aggregated_transaction GROUP BY state ORDER BY total DESC LIMIT 10", engine)
+    cat_perf = pd.read_sql("SELECT category, SUM(amount) as total FROM aggregated_transaction GROUP BY category ORDER BY total DESC", engine)
 
-# ---- CLEAN STATE NAMES ----
-df['state_clean'] = (
-    df['state']
-    .str.replace("-", " ", regex=False)
-    .str.replace("&", "and", regex=False)
-    .str.strip()
-    .str.title()
-)
+    col_l, col_r = st.columns(2)
+    with col_l:
+        st.markdown("**Top Performers (State)**")
+        st.dataframe(top_states, use_container_width=True, hide_index=True)
+        st.plotly_chart(render_pro_chart(top_states, 'state', 'total', "", t5_choice), use_container_width=True)
+    with col_r:
+        st.markdown("**Transaction Category Split**")
+        st.dataframe(cat_perf, use_container_width=True, hide_index=True)
+        st.plotly_chart(render_pro_chart(cat_perf, 'category', 'total', "", t5_choice), use_container_width=True)
 
-# ---- MANUAL FIXES (IMPORTANT FOR INDIA DATA) ----
-state_mapping = {
-    "Andaman And Nicobar Islands": "Andaman and Nicobar Islands",
-    "Dadra And Nagar Haveli And Daman And Diu": "Dadra and Nagar Haveli and Daman and Diu",
-    "Nct Of Delhi": "Delhi",
-    "Jammu And Kashmir": "Jammu & Kashmir"
-}
+    st.markdown(f"""<div class="insight-box"><div class="insight-title">Database Insights</div>
+    The highest volume category is <b>{cat_perf.iloc[0]['category']}</b>, while <b>{top_states.iloc[0]['state'].title()}</b> leads in national revenue contribution.</div>""", unsafe_allow_html=True)
 
-df['state_clean'] = df['state_clean'].replace(state_mapping)
-
-# ---- LOAD GEOJSON ----
-import json, os
-
-st.markdown("## 🌍 India Map")
-
-geo_path = os.path.join(os.path.dirname(__file__), "india_states.geojson")
-
-with open(geo_path) as f:
-    geojson = json.load(f)
-
-# ---- AUTO DETECT GEOJSON KEY (🔥 MAIN FIX) ----
-sample_props = geojson['features'][0]['properties']
-possible_keys = ['ST_NM', 'state', 'NAME_1', 'name']
-
-KEY = None
-for k in possible_keys:
-    if k in sample_props:
-        KEY = k
-        break
-
-if KEY is None:
-    st.error("❌ Could not find matching key in GeoJSON")
-    st.stop()
-
-# ---- EXTRACT GEO STATES ----
-geo_states = [f['properties'][KEY] for f in geojson['features']]
-
-# ---- MAP DATA ----
-map_data = df.groupby('state_clean')['amount'].sum().reset_index()
-
-# ---- FILTER MATCHING STATES ONLY ----
-map_data = map_data[map_data['state_clean'].isin(geo_states)]
-
-# ---- CHOROPLETH ----
-import plotly.express as px
-
-fig_map = px.choropleth(
-    map_data,
-    geojson=geojson,
-    featureidkey=f"properties.{KEY}",
-    locations="state_clean",
-    color="amount",
-    color_continuous_scale="Turbo"
-)
-
-fig_map.update_geos(fitbounds="locations", visible=False)
-
-st.plotly_chart(fig_map, use_container_width=True)
-
-# ---- INSIGHT ----
-top_state = df.groupby('state')['amount'].sum().idxmax()
-st.success(f"🚀 Highest transaction state: {top_state.upper()}")
-
-# ---- STATE COMPARISON ----
-st.markdown("## ⚖ Compare States")
-
-state1 = st.selectbox("Select State 1", df['state'].unique(), key="s1")
-state2 = st.selectbox("Select State 2", df['state'].unique(), key="s2")
-
-comp = df[df['state'].isin([state1, state2])]
-
-comp_data = comp.groupby(['year', 'state'])['amount'].sum().reset_index()
-
-fig_comp = px.line(comp_data, x='year', y='amount', color='state',
-                   markers=True, title="State Comparison")
-
-st.plotly_chart(fig_comp, use_container_width=True)
-
-# ---- DOWNLOAD ----
-st.download_button(
-    "⬇ Download Data",
-    data=filtered_df.to_csv(index=False),
-    file_name="phonepe_data.csv"
-)
-
-# ---- EXPORT EXCEL ----
-import io
-
-buffer = io.BytesIO()
-filtered_df.to_excel(buffer, index=False)
-
-st.download_button(
-    label="⬇ Download Excel",
-    data=buffer,
-    file_name="phonepe_data.xlsx",
-    mime="application/vnd.ms-excel"
-)
-
-# ---- FOOTER ----
-st.markdown("---")
-
-st.markdown(
-    """
-    <div style='text-align: center; color: gray; font-size: 14px;'>
-        <p>📱 <b>PhonePe Transaction Dashboard</b></p>
-        <p>Developed by Heena Kousar</p>
-        <p>Built using Python, SQL, Streamlit & Machine Learning</p>
-        <p>© 2026 All Rights Reserved</p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+# ==========================================
+# 6. FOOTER (FIXED NameError: selected_year)
+# ==========================================
+st.sidebar.markdown("---")
+st.sidebar.write("📤 **Data Export**")
+csv = df.to_csv(index=False).encode('utf-8')
+# FIXED: Changed {year} to {selected_year}
+st.sidebar.download_button("📩 Download Professional Report", data=csv, file_name=f"PhonePe_Insights_{selected_year}.csv", mime='text/csv')
+st.sidebar.caption("Data Source: Aggregated PhonePe Transactions (MySQL)")
+st.markdown("<hr><center>Developed by Heena Kousar | Professional Edition v4.5</center>", unsafe_allow_html=True)
