@@ -15,3 +15,10 @@ ORDER BY total DESC;
 SELECT year, SUM(amount) as yearly_total
 FROM aggregated_transaction
 GROUP BY year;
+
+# Top Districts by Volume
+SELECT district, SUM(count) as total_count 
+FROM map_transaction 
+GROUP BY district 
+ORDER BY total_count DESC 
+LIMIT 10;

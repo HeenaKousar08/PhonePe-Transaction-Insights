@@ -5,130 +5,154 @@
 ![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?logo=mysql)
 ![Scikit-Learn](https://img.shields.io/badge/ML-Scikit--Learn-F7931E?logo=scikitlearn)
 
-## 🚀 Overview
-**PhonePe AI-Powered Transaction Insights** is a professional data analytics project that provides deep intelligence into digital transaction patterns across India. This project demonstrates a complete end-to-end data pipeline: **Raw JSON Extraction → Preprocessing → SQL Database → Interactive Dashboard → Machine Learning Insights.**
+
+A full-stack **data analytics dashboard** built using **Streamlit, MySQL, and Machine Learning**, designed to analyze and visualize PhonePe transaction data across India.
 
 ---
 
-## 🎯 Objectives
-* **Analyze** transaction trends across states and fiscal years.
-* **Identify** top-performing states and spending categories using SQL.
-* **Visualize** geographic distribution via high-fidelity India Choropleth maps.
-* **Apply Machine Learning** for market segmentation (Clustering) and future forecasting.
-* **Generate Business Insights** to understand digital payment maturity levels.
+## 🚀 Project Overview
+
+This project provides a **multi-level analytics platform** to explore:
+
+- 📊 State & District level transaction insights
+- 🌍 Interactive India Map visualization
+- 🧠 AI-based market segmentation
+- 🔮 Future transaction predictions
+- 📂 SQL-powered business intelligence
 
 ---
 
-## 📊 Key Features
+## 🎯 Business Objective
 
-### 📉 Interactive Executive Dashboard
-* **Real-time Metrics:** KPI cards for Total Value, Volume, and Average Ticket Size (ATS).
-* **Customization:** Independent chart type selectors (Line/Bar/Area) for every tab.
-* **Dynamic Filtering:** Filter by State and Year to drill down into specific regional data.
-
-### 🌍 India Map Visualization
-* **GeoJSON Integration:** Custom choropleth map for state-wise transaction comparisons.
-* **Heatmap Logic:** Visualizes market saturation and the national digital divide.
-
-### 🧠 AI Analytics (Machine Learning)
-* **Market Segmentation:** Advanced **K-Means Clustering** using dual-features (Transaction Value + Volume) to identify market tiers.
-* **Behavioral Analysis:** Groups states into "Dominant," "Growth," and "Emerging" clusters.
-
-### 🔮 Predictive Forecasting
-* **Polynomial Regression:** Models the non-linear growth of the digital economy.
-* **Model Validation:** Features **Mean Absolute Error (MAE)** to quantify forecast reliability.
-* **Future Outlook:** Generates data-driven projections through 2027.
-
-### 📂 SQL Business Intelligence
-* **Aggregated Insights:** Direct database queries for Category Performance and Yearly Trends.
-* **Enterprise UI:** Clean, professional tables and charts for institutional-level reporting.
+To help stakeholders:
+- Identify **high-performing regions**
+- Detect **growth trends**
+- Understand **user behavior patterns**
+- Make **data-driven decisions**
 
 ---
 
-## 🛠️ Tech Stack
-| Category | Tools Used |
-| :--- | :--- |
-| **Programming** | Python 3.10 |
-| **Dashboard** | Streamlit (Custom CSS) |
-| **Database** | MySQL / SQLAlchemy |
-| **Visualization** | Plotly Express |
-| **Machine Learning** | Scikit-learn (KMeans, LinearRegression) |
-| **Data Handling** | Pandas, NumPy |
+## 🧰 Tech Stack
+
+- **Frontend:** Streamlit
+- **Backend:** Python
+- **Database:** MySQL
+- **Visualization:** Plotly
+- **Machine Learning:** Scikit-learn
+- **Data Processing:** Pandas
 
 ---
 
 ## 📂 Project Structure
-```text
+
 PhonePe-Transaction-Insights/
 │
 ├── app/
-│   ├── app.py                 # Main Streamlit Application
-│   └── india_states.geojson   # GeoJSON for Map Visualization
+│ └── app.py
+│
+├── scripts/
+│ └── load_to_sql.py
 │
 ├── assets/
-│   ├── AIanalytics.png        # AI Tab Screenshot
-│   ├── dashboard.png          # Dashboard Tab Screenshot
-│   ├── indiamap.png           # Map Tab Screenshot
-│   ├── prediction.png         # Forecast Tab Screenshot
-│   ├── sqlintelligence.png    # SQL Tab Screenshot
-│   └── footer.png             # UI Asset
+│ ├── dashboard.png
+│ ├── map.png
+│ ├── prediction.png
 │
-├── data/                      # Standardized CSV files
-├── scripts/
-│   ├── data_extraction.py     # JSON to Dataframe conversion
-│   └── load_to_sql.py         # MySQL Data Ingestion
-│
-├── requirements.txt           # Project Dependencies
-└── README.md                  # Project Documentation
+├── india_states.geojson
+├── requirements.txt
+└── README.md
 
 
-##⚙️ Installation & Setup
+---
 
-1️⃣ Clone Repository
-Bash
-git clone [https://github.com/HeenaKousar08/PhonePe-Transaction-Insights.git](https://github.com/HeenaKousar08/PhonePe-Transaction-Insights.git)
+## ⚙️ Features
+
+### 📉 Dashboard
+- State → District drill-down
+- Transaction value & volume metrics
+- Growth trend visualization
+
+### 🌍 India Map
+- Choropleth map using GeoJSON
+- State-wise transaction comparison
+
+### 🧠 AI Analytics
+- K-Means clustering
+- District segmentation into tiers
+
+### 🔮 Predictions
+- Polynomial Regression forecasting (till 2027)
+
+### 📂 SQL Intelligence
+- Top states by revenue
+- Category-wise performance
+
+---
+
+## 🖼️ Screenshots
+
+### 📊 Dashboard
+![Dashboard](assets/dashboard.png)
+
+### 🌍 India Map
+![Map](assets/Indiamap.png)
+
+### 🔮 Predictions
+![Predictions](assets/prediction.png)
+
+---
+
+## 🛠️ Installation & Setup
+
+### 1️⃣ Clone the repository
+
+```bash
+git clone https://github.com/your-username/PhonePe-Transaction-Insights.git
 cd PhonePe-Transaction-Insights
 
-2️⃣ Install Dependencies
-Bash
+2️⃣ Install dependencies
+
 pip install -r requirements.txt
 
-3️⃣ Setup Database
-Create a MySQL database named phonepe.
+3️⃣ Setup MySQL Database
+Create database:
+CREATE DATABASE phonepe;
+Import data tables:
+aggregated_transaction
+map_transaction
+top_transaction_pincode
 
-Update the credentials in app/app.py:
+4️⃣ Update DB Credentials
 
-Python
+In app.py:
+
 username = "your_username"
 password = "your_password"
-Load the data using the ingestion script:
 
-Bash
-python scripts/load_to_sql.py
-
-4️⃣ Run the Application
-Bash
+5️⃣ Run the App
 streamlit run app/app.py
 
-📸 Dashboard Preview
+📊 Sample Insights
+Maharashtra, Karnataka dominate digital payments
+Urban districts form high-value clusters
+Strong upward trend predicted till 2027
+Pincode-level data reveals micro hotspots
 
-🔹 Executive Dashboard
-🔹 India Map Intelligence
-🔹 AI Analytics & Clustering
-🔹 Prediction Engine
-🔹 SQL Business Intelligence
+🔐 Security Note
 
-📈 Strategic Business Insights
-
-Digital Maturity: Average Ticket Size (ATS) analysis reveals whether a state is a "High-Value" transfer hub or a "Retail Micro-payment" hub.
-
-Saturation Points: Map insights identify states where merchant infrastructure is highly mature.
-
-Market Tiers: Clustering helps businesses prioritize marketing spend based on high-volume vs high-value state behaviors.
+⚠️ Do NOT expose your database credentials in public repositories.
+Use environment variables for production.
 
 👩‍💻 Author
 
-**Heena Kousar**
-**Aspiring Data Analyst**
+Heena Kousar
 
-⭐ If you find this project useful, please consider giving it a Star on GitHub!
+Data Analyst | Python | SQL | ML
+
+📜 License
+
+This project is licensed under the MIT License
+
+⭐ Support
+
+If you like this project, give it a ⭐ on GitHub 🚀
