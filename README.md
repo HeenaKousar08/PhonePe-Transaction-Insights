@@ -44,23 +44,43 @@ To help stakeholders:
 ---
 
 ## 📂 Project Structure
+[ Data Collection ]
 
-PhonePe-Transaction-Insights/
-│
-├── app/
-│ └── app.py
-│
-├── scripts/
-│ └── load_to_sql.py
-│
-├── assets/
-│ ├── dashboard.png
-│ ├── map.png
-│ ├── prediction.png
-│
-├── india_states.geojson
-├── requirements.txt
-└── README.md
+        ↓
+        
+[ Data Cleaning & Preprocessing ]
+
+        ↓
+        
+[ Feature Engineering ]
+
+        ↓
+        
+[ Data Storage (SQLite / SQL) ]
+
+        ↓
+        
+[ Exploratory Data Analysis ]
+
+        ↓
+        
+[ Visualization Dashboard ]
+
+        ↓
+        
+[ Machine Learning Models ]
+
+   ↙        ↓        ↘
+   
+[Linear] [RandomForest] [KNN]
+
+        ↓
+        
+[ Model Evaluation ]
+
+        ↓
+        
+[ Insights & Prediction ]
 
 
 ---
